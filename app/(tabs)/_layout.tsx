@@ -97,6 +97,13 @@ export default function TabLayout() {
           href: null, // Remove da barra de navegação
         }}
       />
+      
+      <Tabs.Screen
+        name="vehicle"
+        options={{
+          href: null, // Remove da barra de navegação
+        }}
+      />
     </Tabs>
   );
 }
