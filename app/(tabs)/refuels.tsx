@@ -18,7 +18,7 @@ export default function RefuelsScreen() {
   
   const [showForm, setShowForm] = useState(false);
   const [currentKm, setCurrentKm] = useState('');
-  const [liters, setLiters] = useState('');
+  const [pricePerLiter, setPricePerLiter] = useState('');
   const [totalValue, setTotalValue] = useState('');
   const [stationName, setStationName] = useState('');
   const [date, setDate] = useState(new Date());
@@ -51,37 +51,51 @@ export default function RefuelsScreen() {
 
   const resetForm = () => {
     setCurrentKm('');
-    setLiters('');
+    setPricePerLiter('');
     setTotalValue('');
     setStationName('');
     setDate(new Date());
     setShowForm(false);
   };
 
+  const calculateLiters = () => {
+    const priceValue = parseFloat(pricePerLiter.replace(',', '.'));
+    const totalValueAmount = parseFloat(totalValue.replace(',', '.'));
+    
+    if (!isNaN(priceValue) && !isNaN(totalValueAmount) && priceValue > 0) {
+      return totalValueAmount / priceValue;
+    }
+    return 0;
+  };
+
+  const calculatedLiters = calculateLiters();
+
   const handleSubmit = async () => {
-    if (!currentKm.trim() || !liters.trim() || !stationName.trim()) {
-      Alert.alert('Erro', 'Quilometragem, litros e posto são obrigatórios.');
+    if (!currentKm.trim() || !pricePerLiter.trim() || !totalValue.trim() || !stationName.trim()) {
+      Alert.alert('Erro', 'Todos os campos são obrigatórios.');
       return;
     }
 
     const kmValue = parseInt(currentKm, 10);
-    const litersValue = parseFloat(liters);
-    const valueAmount = totalValue.trim() ? parseFloat(totalValue.replace(',', '.')) : undefined;
+    const priceValue = parseFloat(pricePerLiter.replace(',', '.'));
+    const valueAmount = parseFloat(totalValue.replace(',', '.'));
 
     if (isNaN(kmValue) || kmValue <= minKm) {
       Alert.alert('Erro', `A quilometragem deve ser maior que ${minKm} km.`);
       return;
     }
 
-    if (isNaN(litersValue) || litersValue <= 0) {
-      Alert.alert('Erro', 'A quantidade de litros deve ser um número válido.');
+    if (isNaN(priceValue) || priceValue <= 0) {
+      Alert.alert('Erro', 'O valor do litro deve ser um número válido.');
       return;
     }
 
-    if (valueAmount !== undefined && (isNaN(valueAmount) || valueAmount <= 0)) {
+    if (isNaN(valueAmount) || valueAmount <= 0) {
       Alert.alert('Erro', 'O valor total deve ser um número válido.');
       return;
     }
+
+    const litersValue = valueAmount / priceValue;
 
     try {
       await addRefuel({
@@ -89,6 +103,7 @@ export default function RefuelsScreen() {
         date,
         currentKm: kmValue,
         liters: litersValue,
+        pricePerLiter: priceValue,
         totalValue: valueAmount,
         stationName: stationName.trim(),
         stationId: '', // Will be set by the service
@@ -176,18 +191,21 @@ export default function RefuelsScreen() {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Litros</Text>
-              <TextInput
-                style={styles.input}
-                value={liters}
-                onChangeText={setLiters}
-                placeholder="Ex: 45.5"
-                keyboardType="numeric"
-              />
+              <Text style={styles.label}>Valor do Litro (R$)</Text>
+              <View style={styles.inputContainer}>
+                <DollarSign size={20} color="#6B7280" />
+                <TextInput
+                  style={styles.inputWithIcon}
+                  value={pricePerLiter}
+                  onChangeText={setPricePerLiter}
+                  placeholder="Ex: 5,89"
+                  keyboardType="numeric"
+                />
+              </View>
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Valor Total (R$) - Opcional</Text>
+              <Text style={styles.label}>Valor Total (R$)</Text>
               <View style={styles.inputContainer}>
                 <DollarSign size={20} color="#6B7280" />
                 <TextInput
@@ -198,6 +216,19 @@ export default function RefuelsScreen() {
                   keyboardType="numeric"
                 />
               </View>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Litros (Calculado)</Text>
+              <TextInput
+                style={styles.input}
+                value={calculatedLiters > 0 ? calculatedLiters.toFixed(2) : ''}
+                placeholder="Será calculado automaticamente"
+                editable={false}
+              />
+              <Text style={styles.hint}>
+                Calculado automaticamente: Valor Total ÷ Valor do Litro
+              </Text>
             </View>
 
             <View style={styles.inputGroup}>
@@ -257,9 +288,6 @@ export default function RefuelsScreen() {
             
             {sortedRefuels.map((refuel, index) => {
               const isFirst = index === 0;
-              const pricePerLiter = refuel.totalValue && refuel.liters > 0 
-                ? refuel.totalValue / refuel.liters 
-                : null;
               
               return (
                 <View key={refuel.id} style={[styles.refuelCard, isFirst && styles.latestRefuel]}>
@@ -295,29 +323,25 @@ export default function RefuelsScreen() {
 
                     <View style={styles.refuelMetrics}>
                       <View style={styles.metricItem}>
+                        <Text style={styles.metricLabel}>R$/L</Text>
+                        <Text style={styles.metricValue}>{formatCurrency(refuel.pricePerLiter)}</Text>
+                      </View>
+
+                      <View style={styles.metricItem}>
+                        <Text style={styles.metricLabel}>Total</Text>
+                        <Text style={styles.metricValue}>{formatCurrency(refuel.totalValue)}</Text>
+                      </View>
+
+                      <View style={styles.metricItem}>
                         <Text style={styles.metricLabel}>Litros</Text>
                         <Text style={styles.metricValue}>{refuel.liters.toFixed(1)}L</Text>
                       </View>
-
-                      {refuel.totalValue && (
-                        <View style={styles.metricItem}>
-                          <Text style={styles.metricLabel}>Total</Text>
-                          <Text style={styles.metricValue}>{formatCurrency(refuel.totalValue)}</Text>
-                        </View>
-                      )}
-
-                      {pricePerLiter && (
-                        <View style={styles.metricItem}>
-                          <Text style={styles.metricLabel}>R$/L</Text>
-                          <Text style={styles.metricValue}>{formatCurrency(pricePerLiter)}</Text>
-                        </View>
-                      )}
 
                       {refuel.consumption && refuel.consumption > 0 && (
                         <View style={styles.consumptionItem}>
                           <TrendingUp size={16} color="#10B981" />
                           <Text style={styles.consumptionValue}>
-                            {refuel.consumption.toFixed(1)} km/L
+                            {refuel.consumption.toFixed(2)} km/L
                           </Text>
                         </View>
                       )}
@@ -399,6 +423,10 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     backgroundColor: '#FFFFFF',
+  },
+  disabledInput: {
+    backgroundColor: '#F9FAFB',
+    color: '#6B7280',
   },
   inputContainer: {
     flexDirection: 'row',

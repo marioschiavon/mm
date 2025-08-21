@@ -19,8 +19,9 @@ export interface Refuel {
   vehicleId: string;
   date: Date;
   currentKm: number;
-  liters: number;
-  totalValue?: number;
+  liters: number; // Calculated field
+  pricePerLiter: number;
+  totalValue: number;
   stationId: string;
   stationName: string;
   consumption?: number;

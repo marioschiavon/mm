@@ -104,7 +104,7 @@ export const getUserVehicles = (callback: (vehicles: Vehicle[]) => void) => {
 };
 
 // Refuel functions
-export const addRefuel = async (refuel: Omit<Refuel, 'id' | 'userId'>) => {
+export const addRefuel = async (refuel: Omit<Refuel, 'id' | 'userId' | 'consumption' | 'kmTraveled'>) => {
   if (!auth.currentUser) throw new Error('User not authenticated');
   
   const docRef = await addDoc(collection(db, 'refuels'), {
