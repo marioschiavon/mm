@@ -76,6 +76,27 @@ export default function TabLayout() {
           href: null, // Remove da barra de navegação
         }}
       />
+      
+      <Tabs.Screen
+        name="history"
+        options={{
+          href: null, // Remove da barra de navegação
+        }}
+      />
+      
+      <Tabs.Screen
+        name="settings"
+        options={{
+          href: null, // Remove da barra de navegação
+        }}
+      />
+      
+      <Tabs.Screen
+        name="add-refuel"
+        options={{
+          href: null, // Remove da barra de navegação
+        }}
+      />
     </Tabs>
   );
 }
