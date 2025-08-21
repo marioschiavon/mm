@@ -4,6 +4,8 @@ import { MapPin, CreditCard as Edit3, TrendingUp, Car } from 'lucide-react-nativ
 import { useApp } from '@/contexts/AppContext';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { AuthScreen } from '@/components/AuthScreen';
+import { CustomHeader } from '@/components/CustomHeader';
+import { SideMenuModal } from '@/components/SideMenuModal';
 
 export default function StationsScreen() {
   const { 
@@ -14,6 +16,7 @@ export default function StationsScreen() {
     updateStationName, 
     getVehicleStats 
   } = useApp();
+  const [menuVisible, setMenuVisible] = useState(false);
 
   if (loading) {
     return <LoadingScreen />;
@@ -66,17 +69,18 @@ export default function StationsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <MapPin size={28} color="#3B82F6" />
-          <Text style={styles.headerTitle}>Postos</Text>
-        </View>
-        <Text style={styles.headerSubtitle}>
-          {selectedVehicle.name} • {selectedVehicle.plate}
-        </Text>
-      </View>
+      <CustomHeader title="Postos" onMenuPress={() => setMenuVisible(true)} />
+      <SideMenuModal visible={menuVisible} onClose={() => setMenuVisible(false)} />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {selectedVehicle && (
+          <View style={styles.vehicleInfo}>
+            <Text style={styles.vehicleText}>
+              {selectedVehicle.name} • {selectedVehicle.plate}
+            </Text>
+          </View>
+        )}
+        
         {stats.stationAverages.length === 0 ? (
           <View style={styles.emptyState}>
             <MapPin size={64} color="#9CA3AF" />
@@ -143,30 +147,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F9FAFB',
   },
-  header: {
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    marginLeft: 8,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
   content: {
     flex: 1,
     padding: 16,
+  },
+  vehicleInfo: {
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  vehicleText: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
   },
   emptyState: {
     flex: 1,

@@ -4,6 +4,8 @@ import { Car, Plus, CreditCard as Edit3, Trash2, CircleCheck as CheckCircle } fr
 import { useApp } from '@/contexts/AppContext';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { AuthScreen } from '@/components/AuthScreen';
+import { CustomHeader } from '@/components/CustomHeader';
+import { SideMenuModal } from '@/components/SideMenuModal';
 
 export default function VehiclesScreen() {
   const { 
@@ -22,6 +24,7 @@ export default function VehiclesScreen() {
   const [name, setName] = useState('');
   const [plate, setPlate] = useState('');
   const [initialKm, setInitialKm] = useState('');
+  const [menuVisible, setMenuVisible] = useState(false);
 
   if (loading) {
     return <LoadingScreen />;
@@ -98,20 +101,18 @@ export default function VehiclesScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <Car size={28} color="#3B82F6" />
-          <Text style={styles.headerTitle}>Meus Veículos</Text>
-        </View>
+      <CustomHeader title="Meus Veículos" onMenuPress={() => setMenuVisible(true)} />
+      <SideMenuModal visible={menuVisible} onClose={() => setMenuVisible(false)} />
+
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <TouchableOpacity 
           style={styles.addButton}
           onPress={() => setShowForm(true)}
         >
           <Plus size={20} color="#FFFFFF" />
+          <Text style={styles.addButtonText}>Adicionar Veículo</Text>
         </TouchableOpacity>
-      </View>
-
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        
         {showForm && (
           <View style={styles.formCard}>
             <Text style={styles.formTitle}>
@@ -230,33 +231,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F9FAFB',
   },
-  header: {
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    marginLeft: 8,
-  },
-  addButton: {
-    backgroundColor: '#3B82F6',
-    padding: 8,
-    borderRadius: 8,
-  },
   content: {
     flex: 1,
     padding: 16,
+  },
+  addButton: {
+    backgroundColor: '#3B82F6',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  addButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
   formCard: {
     backgroundColor: '#FFFFFF',

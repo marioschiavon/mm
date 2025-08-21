@@ -1,14 +1,18 @@
 import React from 'react';
+import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Chrome as Home, TrendingUp, MapPin, Calendar, Fuel, Plus, Car } from 'lucide-react-native';
 import { useApp } from '@/contexts/AppContext';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { AuthScreen } from '@/components/AuthScreen';
+import { CustomHeader } from '@/components/CustomHeader';
+import { SideMenuModal } from '@/components/SideMenuModal';
 
 export default function DashboardScreen() {
   const { user, loading, selectedVehicle, getVehicleStats } = useApp();
   const router = useRouter();
+  const [menuVisible, setMenuVisible] = useState(false);
 
   if (loading) {
     return <LoadingScreen />;
@@ -43,16 +47,17 @@ export default function DashboardScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <CustomHeader title="Dashboard" onMenuPress={() => setMenuVisible(true)} />
+      <SideMenuModal visible={menuVisible} onClose={() => setMenuVisible(false)} />
+      
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View style={styles.headerContent}>
-            <Fuel size={28} color="#3B82F6" />
-            <Text style={styles.headerTitle}>Dashboard</Text>
+        {selectedVehicle && (
+          <View style={styles.vehicleInfo}>
+            <Text style={styles.vehicleText}>
+              {selectedVehicle.name} • {selectedVehicle.plate}
+            </Text>
           </View>
-          <Text style={styles.headerSubtitle}>
-            {selectedVehicle.name} • {selectedVehicle.plate}
-          </Text>
-        </View>
+        )}
 
         <TouchableOpacity 
           style={styles.quickAddButton}
@@ -153,26 +158,17 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  header: {
+  vehicleInfo: {
     backgroundColor: '#FFFFFF',
-    padding: 20,
+    padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
-  },
-  headerContent: {
-    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    marginLeft: 8,
-  },
-  headerSubtitle: {
+  vehicleText: {
     fontSize: 14,
     color: '#6B7280',
+    fontWeight: '500',
   },
   quickAddButton: {
     backgroundColor: '#3B82F6',
